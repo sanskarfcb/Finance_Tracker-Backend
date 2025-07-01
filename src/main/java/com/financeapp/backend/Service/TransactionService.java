@@ -1,5 +1,7 @@
 package com.financeapp.backend.Service;
 
+import com.financeapp.backend.DTOs.MonthlyExpenseDTO;
+import com.financeapp.backend.DTOs.MonthyBalanceDTO;
 import com.financeapp.backend.DTOs.Summary;
 import com.financeapp.backend.Model.Transaction;
 import com.financeapp.backend.Model.User;
@@ -10,10 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,5 +84,54 @@ public class TransactionService {
 
         Pageable pageable = PageRequest.of(page,size,sort);
         return transactionRepo.findByUserId(user.getId(),pageable);
+    }
+    public List<MonthlyExpenseDTO> getMonthlyExpenseSummary(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+
+        List<Transaction> transactions = transactionRepo.findByUserId(user.getId());
+
+        // Group by Month (format: YYYY-MM)
+        Map<String, Double> expenseByMonth = transactions.stream()
+                .filter(t -> t.getType().equalsIgnoreCase("EXPENSE"))
+                .collect(Collectors.groupingBy(
+                        t -> t.getDate().toString().substring(0, 7), // "2025-06"
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        return expenseByMonth.entrySet().stream()
+                .map(e -> new MonthlyExpenseDTO(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(MonthlyExpenseDTO::getMonth))
+                .collect(Collectors.toList());
+    }
+    public List<MonthyBalanceDTO> monthyBalance(String email){
+        User user = userRepo.findByEmail(email).orElseThrow();
+
+        List<Transaction> transactions =transactionRepo.findByUserId(user.getId());
+
+        Map<String,List<Transaction>> grouped = transactions.stream()
+                .collect(Collectors.groupingBy(tnx->tnx.getDate().toString().substring(0,7)));
+
+        List<String> sortedMonths = new ArrayList<>(grouped.keySet());
+        Collections.sort(sortedMonths);
+
+        List<MonthyBalanceDTO> result = new ArrayList<>();
+        double runningBalance = 0;
+
+        for(String month : sortedMonths){
+            double income = grouped.get(month).stream()
+                    .filter(txn->txn.getType().equalsIgnoreCase("INCOME"))
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+
+            double expense = grouped.get(month).stream()
+                    .filter(txn->txn.getType().equalsIgnoreCase("EXPENSE"))
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+
+            runningBalance = runningBalance + (income-expense);
+            result.add(new MonthyBalanceDTO(month,runningBalance));
+
+        }
+        return result;
     }
 }

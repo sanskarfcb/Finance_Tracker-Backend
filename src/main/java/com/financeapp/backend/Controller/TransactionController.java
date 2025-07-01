@@ -1,5 +1,6 @@
 package com.financeapp.backend.Controller;
 
+import com.financeapp.backend.DTOs.MonthlyExpenseDTO;
 import com.financeapp.backend.DTOs.Summary;
 import com.financeapp.backend.Model.Transaction;
 import com.financeapp.backend.Service.TransactionService;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/transaction")
 @RequiredArgsConstructor
@@ -54,5 +57,9 @@ public class TransactionController {
     ){
         return ResponseEntity.ok(
                 transactionService.getTransactionsPaginated(principal.getName(),page,size,sortBy,direction));
+    }
+    @GetMapping("/monthly-expense")
+    public ResponseEntity<List<MonthlyExpenseDTO>> getMonthlyExpense(Principal principal) {
+        return ResponseEntity.ok(transactionService.getMonthlyExpenseSummary(principal.getName()));
     }
 }

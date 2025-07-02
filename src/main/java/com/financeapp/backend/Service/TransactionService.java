@@ -75,7 +75,7 @@ public class TransactionService {
                 .mapToDouble(Transaction::getAmount)
                 .sum();
 
-        return new Summary(income, expense, income - expense);
+        return new Summary(income, expense, income - expense, user.getName());
     }
     public Page<Transaction> getTransactionsPaginated(String email , int page , int size , String sortBy , String direction){
         User user = userRepo.findByEmail(email).orElseThrow();

@@ -10,4 +10,5 @@ public class Summary {
     private double totalIncome;
     private double totalExpense;
     private double balance;
+    private String name;
 }

@@ -29,3 +29,38 @@ A secure and feature-rich Finance Tracker backend built using **Spring Boot**, *
 - **Maven**
 - **Postman** (for testing)
 - **Swagger** (optional for API docs)
+
+  ## 📂 Project Structure
+  src/
+├── config/              # Security Config, CORS, JWT
+├── controller/          # REST Controllers
+├── dto/                 # Data Transfer Objects
+├── entity/              # JPA Entities
+├── exception/           # Global Exception Handling
+├── repository/          # Spring Data JPA Repositories
+├── service/             # Service Layer
+├── util/                # Utility classes (e.g. JWT Provider)
+└── FinanceApp.java      # Main class
+
+---
+
+## 📦 Setup Instructions
+
+1. **Clone the Repo**
+   ```bash
+   git clone https://github.com/your-username/finance-tracker-api.git
+   cd finance-tracker-api
+   	2.	Configure PostgreSQL DB
+	•	Create a database called finance_app
+	•	Update your DB credentials in application.properties
+
+Authentication Flow
+	1.	Register (/auth/register)
+	2.	Login (/auth/login) → returns a JWT
+	3.	Use JWT in Authorization: Bearer <token> for all secured endpoints
+
+
+Sanskar Mishra
+📍 Varanasi, India
+📧 sanskarmishra.work@gmail.com
+
